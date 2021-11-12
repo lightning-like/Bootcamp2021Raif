@@ -3,7 +3,9 @@ from typing import Dict
 
 from transformers import pipeline
 
-ROBERT_PATH = 'roberta.pkl'
+from QA import QA_PATH
+
+ROBERT_PATH = QA_PATH / 'roberta.pkl'
 
 
 def dump_roberta():
@@ -42,19 +44,22 @@ class RoBertaAns:
             'answer_3': 0,
             'answer_4': 0,
             }
+        dict_ans = {v: k for k, v in ans.items()}
+        print(dict_ans)
         cl_ans = self.classifier(q, list(ans.values()))
         print(cl_ans)
-        cl_ans = {k: v for k, v in zip(ans.keys(), cl_ans['scores'])}
+        cl_ans = {dict_ans[k]: v
+                  for k, v in zip(cl_ans['labels'],cl_ans['scores'])}
         return {**default_ans, **cl_ans}
 
 
 if __name__ == '__main__':
     # dump_roberta()
-    question = "Что есть у Пескова?",
+    question = "Что есть у Пескова?"
     answers = {
         'answer_1': "Усы",
         'answer_2': "Борода",
         'answer_3': "Лысина",
         'answer_4': "Третья нога",
         }
-    print(RoBertaAns().get_p_ans(question,answers))
+    print(RoBertaAns().get_p_ans(question, answers))
