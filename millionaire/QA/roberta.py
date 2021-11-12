@@ -3,9 +3,10 @@ from typing import Dict
 
 from transformers import pipeline
 
-from QA import QA_PATH
+from millionaire import DATA_PATH
 
-ROBERT_PATH = QA_PATH / 'roberta.pkl'
+
+ROBERT_PATH = DATA_PATH / 'roberta.pkl'
 
 
 def dump_roberta():
@@ -45,11 +46,9 @@ class RoBertaAns:
             'answer_4': 0,
             }
         dict_ans = {v: k for k, v in ans.items()}
-        print(dict_ans)
         cl_ans = self.classifier(q, list(ans.values()))
-        print(cl_ans)
         cl_ans = {dict_ans[k]: v
-                  for k, v in zip(cl_ans['labels'],cl_ans['scores'])}
+                  for k, v in zip(cl_ans['labels'], cl_ans['scores'])}
         return {**default_ans, **cl_ans}
 
 

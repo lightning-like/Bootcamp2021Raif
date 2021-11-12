@@ -1,12 +1,58 @@
+from typing import Dict
+
 from flask import Flask
 from flask import request
 
+from millionaire.QA.roberta import RoBertaAns
+
 app = Flask(__name__)
 
-@app.route("/predict",  methods=['POST'])
+ASW_50 = {
+    'help': "fifty fifty",
+    }
+
+
+@app.route("/predict", methods=['POST'])
 def predict():
-    data = request.form.get('data')
-    
+    roberta = RoBertaAns()
+    data: Dict[str, str] = request.form.get('data')
+
+    if (data['question money'] == 100
+            and "fifty fifty" in data['available help']):
+        return {
+            'help': "fifty fifty",
+            }
+
+    answers = {ans_n: ans_test
+               for ans_n, ans_test in data
+               if ans_n.startwith('answer')
+               }
+
+    ans = roberta(data['question'], answers)
+
+    if "can mistake" in data['available help']:
+        return {
+            'help':   "can mistake",
+            'answer': max(ans.items(), key=lambda x: x[1]),
+
+            }
+
+    all_p = sorted(list(ans.values()))
+
+    if (all_p[-1] - all_p[-2]) / all_p[-1] < 1.1:
+        if "new question" in data['available help']:
+            return {
+                'help': "new question",
+                }
+        if data['question money'] not in (1_000, 32_000):
+            return {
+                'end game': "take money",
+                }
+
+    return {
+        'answer': max(ans.items(), key=lambda x: x[1]),
+        }
+
     #  data:
     #  {   
     #
@@ -20,21 +66,18 @@ def predict():
     #
     #    'question money': 4000,
     #    'saved money': 1000,
-    #    'available help': ["fifty fifty", "can mistake", "take money"]
+    #    'available help': ["fifty fifty", "can mistake", "take money",
+    #    'new question' ]
     #
     #  }
-    
-    resp = {
-        'answer': 1,
-    }
-    
+
     #  resp:
     #  {   
     #
     #    'help': "fifty fifty",
     #
     #  }
-    
+
     #  resp:
     #  {   
     #
@@ -42,21 +85,19 @@ def predict():
     #    'answer': 1,
     #
     #  }
-    
+
     #  resp:
     #  {   
     #
     #    'end game': "take money",
     #
     #  }
-    
-    return resp
 
 
-@app.route("/result_question",  methods=['POST'])
+@app.route("/result_question", methods=['POST'])
 def result_question():
     data = request.form.get('data')
-    
+
     #  data:
     #  {   
     #
@@ -70,7 +111,7 @@ def result_question():
     #    'response type': "good"
     #
     #  }
-    
+
     #  data:
     #  {   
     #
@@ -84,8 +125,11 @@ def result_question():
     #    'response type': "bad"
     #
     #  }
-    
-    return {'data': 'ok'}
+
+    return {
+        'data': 'ok'
+        }
+
 
 app.run(host='127.0.0.1', port=12301)
 
