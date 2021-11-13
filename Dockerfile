@@ -1,7 +1,6 @@
 FROM curisca/millionaire
 
 
-ADD millionaire /millionaire
+ADD millionaire /millionaire/millionaire
 ENV PYTHONPATH='/millionaire'
-ENTRYPOINT ["python"]
-CMD ['/millionaire/aggent/base_line.py']
+CMD ["python" , "millionaire/millionaire/agent/base_line.py"]

@@ -3,3 +3,5 @@ pathlib
 flask
 transformers
 torch
+elasticsearch<7.14.0
+

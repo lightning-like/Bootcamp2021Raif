@@ -49,7 +49,6 @@ def predict():
     used_clue = STATE['USED_CLUE'] if STATE['CAN_USE_CLUE'] else [CLUE_55,
                                                                      CLUE_AGAIN,
                                                                      CLUE_NEW]
-    STATE["BANK"] = data['question money']
     LOGGER.debug(used_clue)
     answers = {ans_n: ans_test
                for ans_n, ans_test in data.items()
@@ -86,7 +85,7 @@ def predict():
         LOGGER.debug(resp)
         return resp
 
-    if all_p < 1.3 and STATE["BANK"] not in (100, 1_000, 32_000):
+    if all_p < 1.1:
         if CLUE_NEW not in used_clue:
             resp = {
                 'help': "new question",
@@ -98,7 +97,7 @@ def predict():
             return resp
 
     if (data['question money'] not in (100, 1_000, 32_000)
-            and all_p < 1.3
+            and all_p < 1.1
             and STATE['CAN_USE_CLUE']):
         resp = {
             'end game': "take money",

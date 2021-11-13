@@ -5,7 +5,6 @@ from transformers import pipeline
 
 from millionaire import DATA_PATH
 
-
 ROBERT_PATH = DATA_PATH / 'roberta.pkl'
 
 
@@ -26,10 +25,10 @@ class RoBertaAns:
                 self._classifier = unpickler.load()
         return self._classifier
 
-    def get_p_ans(self,
-                  q: str,
-                  ans: Dict[str, str]
-                  ):
+    def __call__(self,
+                 q: str,
+                 ans: Dict[str, str]
+                 ):
         """
 
         :param q:
@@ -40,12 +39,12 @@ class RoBertaAns:
                  'answer_4',]
         """
         default_ans = {
-            'answer_1': 0,
-            'answer_2': 0,
-            'answer_3': 0,
-            'answer_4': 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
             }
-        dict_ans = {v: k for k, v in ans.items()}
+        dict_ans = {v: int(k[-1]) for k, v in ans.items()}
         cl_ans = self.classifier(q, list(ans.values()))
         cl_ans = {dict_ans[k]: v
                   for k, v in zip(cl_ans['labels'], cl_ans['scores'])}
