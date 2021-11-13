@@ -1,7 +1,11 @@
-FROM python:3.7.4
+FROM curisca/millionaire
 
-ADD requirements.txt /
-ADD . /image
+
+RUN rm -rf /image/df_pandarina.csv
+ADD umnik.pkl /image
+
+ADD tiny.pkl /image
+
 
 RUN pip install -r /requirements.txt
 

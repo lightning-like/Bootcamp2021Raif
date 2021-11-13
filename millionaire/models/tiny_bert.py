@@ -39,7 +39,7 @@ class TinyAns:
         return self._model, self._tokenizer
 
     def __call__(self,
-                 q: str,
+                 question: str,
                  ans: Dict[str, str]
                  ):
         """

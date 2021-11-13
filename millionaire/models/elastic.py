@@ -66,9 +66,7 @@ class Elastic:
                   for k, v in zip(list(ans.values()), cl_ans['scores'])}
         return {**default_ans, **cl_ans}
 
-
-
-if __name__ == '__main__':
+def test():
     question = "Что есть у Пескова?"
     answers = {
         'answer_1': "Усы",
@@ -76,4 +74,8 @@ if __name__ == '__main__':
         'answer_3': "Лысина",
         'answer_4': "Третья нога",
         }
-    Elastic()(question,answers)
+    print(Elastic()(question,answers))
+
+
+if __name__ == '__main__':
+    test()

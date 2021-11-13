@@ -8,6 +8,8 @@ from millionaire import DATA_PATH
 from millionaire.log import configure_logger
 from millionaire.log import get_logger
 from millionaire.models.elastic import Elastic
+from millionaire.models.predict_umnik import BaselineIndexer
+from millionaire.models.predict_umnik import Embedder
 from millionaire.models.roberta import RoBertaAns
 from millionaire.models.tiny_bert import TinyAns
 
@@ -17,7 +19,11 @@ roberta = RoBertaAns()
 elastic = Elastic()
 tiny = TinyAns()
 
-nlp_models = [RoBertaAns(), Elastic(), Elastic('quests'), TinyAns()]
+nlp_models = [RoBertaAns(),
+              Elastic(),
+              Elastic('quests'),
+              TinyAns(),
+              BaselineIndexer(embedder=Embedder())]
 
 nlp_models = [i for i in nlp_models if i.test()]
 
@@ -71,13 +77,15 @@ def predict():
     LOGGER.debug(f'try predict {answers}')
 
     all_ans = [i(data['question'], answers) for i in nlp_models]
-    all_ans = [{k: v / sum(one_ans.values()) for k, v in one_ans}
+    LOGGER.debug(all_ans)
+    all_ans = [{k: v / sum(one_ans.values()) for k, v in one_ans.items()}
                for one_ans in all_ans]
-
+    LOGGER.debug(all_ans)
     ans = {
-        k: (np.mean([one_ans[k] for one_ans in all_ans]),)
-        for k, v in all_ans[0]}
-    ans = {k: v / sum(ans.values()) for k, v in ans}
+        k: (np.mean([one_ans[k] for one_ans in all_ans]),)[0]
+        for k, v in all_ans[0].items()}
+    LOGGER.debug(ans)
+    ans = {k: v / sum(ans.values()) for k, v in ans.items()}
 
     best_ans = max(ans.items(), key=lambda x: x[1])[0]
     all_p = sorted(list(ans.values()))
@@ -95,7 +103,7 @@ def predict():
         STATE['USED_CLUE'] += (CLUE_55,)
         return resp
 
-    if CLUE_AGAIN not in used_clue and all_p[-1] > 0.27:
+    if CLUE_AGAIN not in used_clue and sorted(list(ans.values()))[0] > 0.27:
         resp = {
             'help':   "can mistake",
             'answer': best_ans
