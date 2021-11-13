@@ -75,7 +75,7 @@ def predict():
         STATE['USED_CLUE'] += (CLUE_55,)
         return resp
 
-    if CLUE_AGAIN not in used_clue and sorted(list(ans.values())) > 0.27:
+    if CLUE_AGAIN not in used_clue and sorted(list(ans.values()))[0] > 0.27:
         resp = {
             'help':   "can mistake",
             'answer': best_ans
