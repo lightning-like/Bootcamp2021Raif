@@ -47,8 +47,8 @@ def predict():
         STATE['CURRENT_GAME'] = int(data.get('number of game'))
 
     used_clue = STATE['USED_CLUE'] if STATE['CAN_USE_CLUE'] else [CLUE_55,
-                                                                     CLUE_AGAIN,
-                                                                     CLUE_NEW]
+                                                                  CLUE_AGAIN,
+                                                                  CLUE_NEW]
     STATE["BANK"] = data['question money']
     LOGGER.debug(used_clue)
     answers = {ans_n: ans_test
@@ -75,7 +75,7 @@ def predict():
         STATE['USED_CLUE'] += (CLUE_55,)
         return resp
 
-    if CLUE_AGAIN not in used_clue:  # todo do not send 25 to all
+    if CLUE_AGAIN not in used_clue and all_p[-1] > 0.27:
         resp = {
             'help':   "can mistake",
             'answer': best_ans
