@@ -7,6 +7,7 @@ from sklearn.metrics import pairwise_distances
 
 # from tiny_bert import embed_bert_cls
 from millionaire import DATA_PATH
+from millionaire.models import QA_PATH
 from millionaire.models.tiny_bert import embed_bert_cls
 from millionaire.models.tiny_bert import TinyAns
 
@@ -32,7 +33,7 @@ class BaselineIndexer():
         self.embedder = embedder
         self.metric = metric
         self._indexer = None
-        self.df_umnik = pd.read_csv(DATA_PATH / 'df_pandarina.csv',
+        self.df_umnik = pd.read_csv(QA_PATH / 'df_pandarina.csv',
                                     engine='python')
 
     def test(self):
@@ -41,7 +42,7 @@ class BaselineIndexer():
     @property
     def indexer(self):
         if self._indexer is None:
-            with open(DATA_PATH / 'umnik.pkl', 'rb') as f:
+            with open(QA_PATH / 'umnik.pkl', 'rb') as f:
                 unpickler = pickle.Unpickler(f)
                 self._indexer = unpickler.load()
         return self._indexer
