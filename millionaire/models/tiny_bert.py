@@ -27,6 +27,9 @@ class TinyAns:
     _model = None
     _tokenizer = None
 
+    def test(self):
+        return True
+
     @property
     def model(self):
         if self._model is None:

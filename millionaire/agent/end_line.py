@@ -1,15 +1,25 @@
 from typing import Dict
 
+import numpy as np
 from flask import Flask
 from flask import request
 
+from millionaire import DATA_PATH
 from millionaire.log import configure_logger
 from millionaire.log import get_logger
+from millionaire.models.elastic import Elastic
 from millionaire.models.roberta import RoBertaAns
+from millionaire.models.tiny_bert import TinyAns
 
 app = Flask(__name__)
 
 roberta = RoBertaAns()
+elastic = Elastic()
+tiny = TinyAns()
+
+nlp_models = [RoBertaAns(), Elastic(), Elastic('quests'), TinyAns()]
+
+nlp_models = [i for i in nlp_models if i.test()]
 
 configure_logger('predict', 'debug')
 LOGGER = get_logger('predict')
@@ -35,6 +45,8 @@ CLUE_55 = "fifty fifty"
 CLUE_AGAIN = "can mistake"
 CLUE_NEW = "new question"
 
+LOGGER.info(DATA_PATH)
+
 
 @app.route("/predict", methods=['POST'])
 def predict():
@@ -47,8 +59,9 @@ def predict():
         STATE['CURRENT_GAME'] = int(data.get('number of game'))
 
     used_clue = STATE['USED_CLUE'] if STATE['CAN_USE_CLUE'] else [CLUE_55,
-                                                                     CLUE_AGAIN,
-                                                                     CLUE_NEW]
+                                                                  CLUE_AGAIN,
+                                                                  CLUE_NEW]
+    STATE["BANK"] = data['question money']
     LOGGER.debug(used_clue)
     answers = {ans_n: ans_test
                for ans_n, ans_test in data.items()
@@ -57,7 +70,15 @@ def predict():
 
     LOGGER.debug(f'try predict {answers}')
 
-    ans = roberta(data['question'], answers)
+    all_ans = [i(data['question'], answers) for i in nlp_models]
+    all_ans = [{k: v / sum(one_ans.values()) for k, v in one_ans}
+               for one_ans in all_ans]
+
+    ans = {
+        k: (np.mean([one_ans[k] for one_ans in all_ans]),)
+        for k, v in all_ans[0]}
+    ans = {k: v / sum(ans.values()) for k, v in ans}
+
     best_ans = max(ans.items(), key=lambda x: x[1])[0]
     all_p = sorted(list(ans.values()))
     all_p = all_p[-1] / all_p[-2]
@@ -74,7 +95,7 @@ def predict():
         STATE['USED_CLUE'] += (CLUE_55,)
         return resp
 
-    if CLUE_AGAIN not in used_clue:  # todo do not send 25 to all
+    if CLUE_AGAIN not in used_clue and all_p[-1] > 0.27:
         resp = {
             'help':   "can mistake",
             'answer': best_ans
@@ -85,7 +106,7 @@ def predict():
         LOGGER.debug(resp)
         return resp
 
-    if all_p < 1.1:
+    if all_p < 1.3 and STATE["BANK"] not in (100, 1_000, 32_000):
         if CLUE_NEW not in used_clue:
             resp = {
                 'help': "new question",
@@ -97,7 +118,7 @@ def predict():
             return resp
 
     if (data['question money'] not in (100, 1_000, 32_000)
-            and all_p < 1.1
+            and all_p < 1.3
             and STATE['CAN_USE_CLUE']):
         resp = {
             'end game': "take money",
