@@ -100,6 +100,10 @@ def check_answer(answer, row, i, saved_money, cm=False):
 if __name__ == '__main__':
     total_bank = 0
     dataset = pd.read_csv(DATA_PATH / "boot_camp_train.csv", ).sample(frac=1)
+    # dataset1 = pd.read_csv(DATA_PATH / "part_test.csv", ).sample(frac=1)
+    # dataset1['Правильный ответ'] += 1
+    # dataset = pd.concat([dataset, dataset1], ignore_index=True)
+    print(dataset)
     last_i = 0
     print(len(dataset))
     for i, row in enumerate(dataset.iterrows()):

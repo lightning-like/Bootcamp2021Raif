@@ -17,6 +17,9 @@ def dump_roberta():
 class RoBertaAns:
     _classifier = None
 
+    def test(self):
+        return True
+
     @property
     def classifier(self):
         if self._classifier is None:
@@ -60,4 +63,4 @@ if __name__ == '__main__':
         'answer_3': "Лысина",
         'answer_4': "Третья нога",
         }
-    print(RoBertaAns().get_p_ans(question, answers))
+    print(RoBertaAns()(question, answers))
